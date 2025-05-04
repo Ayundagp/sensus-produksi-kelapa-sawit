@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensus Produksi Kelapa Sawit</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 0.5rem;
+            z-index: 1;
+        }
+        .leaflet-container {
+            height: 100%;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            color: #374151;
+            background-color: #fff;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+        }
+        input[readonly] {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <script>
+        // Redirect to login page if not authenticated
+        if (!localStorage.getItem('isLogged')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <!-- Header -->
+    <header class="bg-green-700 text-white py-6 mb-6">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">Sensus Produksi Kelapa Sawit</h1>
+                    <p class="mt-2">Sistem Pencatatan dan Pelacakan Lokasi Pohon</p>
+                </div>
+                <button onclick="handleLogout()" 
+                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Form Section -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Data Pohon</h2>
+                <form id="treeForm" class="space-y-4" autocomplete="off">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ID Pohon</label>
+                            <input type="text" id="treeId" required
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Umur Pohon (Tahun)</label>
+                            <input type="number" id="treeAge" required min="0"
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tinggi Pohon (Meter)</label>
+                            <input type="number" id="treeHeight" step="0.1" required min="0"
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Produksi (Kg)</label>
+                            <input type="number" id="production" step="0.1" required min="0"
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Kondisi Kesehatan</label>
+                            <select id="healthCondition" required
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm
+                                focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            <option value="sehat">Sehat</option>
+                            <option value="kurang-sehat">Kurang Sehat</option>
+                            <option value="sakit">Sakit</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Catatan</label>
+                            <textarea id="notes" rows="3"
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                placeholder="Tambahkan catatan tentang pohon ini..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Koordinat Lokasi</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <input type="text" id="latitude" readonly placeholder="Latitude"
+                                    class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm shadow-sm text-gray-500 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <input type="text" id="longitude" readonly placeholder="Longitude"
+                                    class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm shadow-sm text-gray-500 cursor-not-allowed">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Klik pada peta untuk menentukan koordinat</p>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit"
+                            class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            Simpan Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Section: Map and Tree List -->
+            <div class="flex flex-col space-y-6">
+                <!-- Map Section -->
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-2">Peta Lokasi</h2>
+                    <p class="text-sm text-gray-600 mb-4">Klik pada peta untuk menentukan lokasi pohon</p>
+                    <div id="map" class="border-2 border-gray-200 h-[500px] w-full rounded-lg overflow-hidden"></div>
+                </div>
+
+                <!-- Tree List -->
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">Daftar Pohon</h2>
+                    <div id="treeList" class="space-y-2 max-h-[300px] overflow-y-auto">
+                        <!-- Tree items will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sensus Produksi Kelapa Sawit</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-cover bg-center" style="background-image: url('https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');">
+    <div class="min-h-screen flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm mx-4">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Masuk</h2>
+                <p class="text-gray-600 mt-2">Sensus Produksi Kelapa Sawit</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6" autocomplete="off">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" id="username" 
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" id="password" 
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            required>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" 
+                            class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                        <label for="remember" class="ml-2 block text-sm text-gray-700">
+                            Ingat saya
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" 
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                        <span>Masuk</span>
+                    </button>
+                </div>
+
+                <div id="loginError" class="text-center text-red-600 text-sm hidden"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login JS -->
+    <script src="js/login.js" defer></script>
+</body>
+</html>

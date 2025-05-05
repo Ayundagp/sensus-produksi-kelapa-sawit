@@ -1,13 +1,35 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Login page loaded');
     const loginForm = document.getElementById('loginForm');
     const errorEl = document.getElementById('loginError');
+    const loginButton = document.getElementById('loginButton');
+    const loginText = document.getElementById('loginText');
+    const loginSpinner = document.getElementById('loginSpinner');
     
-    loginForm.addEventListener('submit', function(e) {
+    function setLoading(isLoading) {
+        if (isLoading) {
+            loginButton.disabled = true;
+            loginText.textContent = 'Masuk...';
+            loginSpinner.classList.remove('hidden');
+            loginButton.classList.add('opacity-75', 'cursor-not-allowed');
+        } else {
+            loginButton.disabled = false;
+            loginText.textContent = 'Masuk';
+            loginSpinner.classList.add('hidden');
+            loginButton.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+    }
+    
+    loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        console.log('Login form submitted');
+        
         errorEl.textContent = ''; // Clear previous error messages
         errorEl.classList.add('hidden');
+        
+        setLoading(true);
 
-        // Get username and password values
+        // Get form values
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
         const remember = document.getElementById('remember').checked;
@@ -15,26 +37,28 @@ document.addEventListener('DOMContentLoaded', function() {
         // Basic validation
         if (!username || !password) {
             showError('Semua field wajib diisi.');
+            setLoading(false);
             return;
         }
 
         try {
-            // Hardcoded credentials for demo purposes
-            if(username === 'admin' && password === 'admin123') {
-                // Save authentication flag and username in localStorage
-                localStorage.setItem('isLogged', 'true');
-                localStorage.setItem('loggedUser', username);
-                if (remember) {
-                    localStorage.setItem('rememberMe', 'true');
-                }
-                // Redirect to main page
-                window.location.href = 'index.html';
-            } else {
-                showError('Username atau password salah.');
+            console.log('Attempting login with:', { username });
+            // Call API login function
+            const response = await window.api.login({ username, password });
+            console.log('Login response:', response);
+            
+            // Handle remember me
+            if (remember) {
+                localStorage.setItem('rememberMe', 'true');
             }
+
+            console.log('Login successful, redirecting...');
+            // Redirect to main page
+            window.location.href = 'index.html';
         } catch (err) {
             console.error('Error during login:', err);
-            showError('Terjadi kesalahan. Silakan coba lagi.');
+            showError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
+            setLoading(false);
         }
     });
 
@@ -44,7 +68,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Check if user was remembered
-    if (localStorage.getItem('rememberMe') === 'true' && localStorage.getItem('isLogged') === 'true') {
+    const isRemembered = localStorage.getItem('rememberMe') === 'true';
+    const isLogged = localStorage.getItem('isLogged') === 'true';
+    console.log('Checking remembered login:', { isRemembered, isLogged });
+    
+    if (isRemembered && isLogged) {
+        console.log('User was remembered, redirecting...');
         window.location.href = 'index.html';
     }
 });

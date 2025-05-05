@@ -72,11 +72,13 @@
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Auth Check -->
     <script>
         // Redirect to login page if not authenticated
         if (!localStorage.getItem('isLogged')) {
             window.location.href = 'login.html';
         }
+        console.log('Auth check passed, user is logged in');
     </script>
     <!-- Header -->
     <header class="bg-green-700 text-white py-6 mb-6">
@@ -101,53 +103,191 @@
             <!-- Form Section -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4">Data Pohon</h2>
-                <form id="treeForm" class="space-y-4" autocomplete="off">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">ID Pohon</label>
+                <form id="treeForm" class="space-y-6" autocomplete="off">
+                    <!-- Lokasi & Klasifikasi Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900">Lokasi & Klasifikasi</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Region</label>
+                                <select id="region" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                                    <option value="" disabled selected>Pilih Region</option>
+                                    <option value="Sumatera">Sumatera</option>
+                                    <option value="Kalimantan">Kalimantan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Area</label>
+                                <select id="area" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                                    <option value="" disabled selected>Pilih Area</option>
+                                    <option value="Area 1">Area 1</option>
+                                    <option value="Area 2">Area 2</option>
+                                    <option value="Area 3">Area 3</option>
+                                    <option value="Area 4">Area 4</option>
+                                    <option value="Sungai Rangit">Sungai Rangit</option>
+                                    <option value="Landak">Landak</option>
+                                    <option value="UAI">UAI</option>
+                                    <option value="LAB">LAB</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Kebun</label>
+                                <input type="text" id="kebun" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Divisi</label>
+                                <input type="text" id="divisi" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Blok</label>
+                                <input type="text" id="blok" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Arah Masuk</label>
+                                <select id="arahMasuk" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                                    <option value="" disabled selected>Pilih Arah</option>
+                                    <option value="Utara">Utara</option>
+                                    <option value="Selatan">Selatan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">No Baris</label>
+                                <input type="number" id="noBaris" required min="0"
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">No Pokok</label>
+                                <input type="number" id="noPokok" required min="0"
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Identifikasi Pohon Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900">Identifikasi Pohon</h3>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">ID Pohon</label>
                             <input type="text" id="treeId" required
                                 class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
                                 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
-                    </div>
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Umur Pohon (Tahun)</label>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Umur Pohon (Tahun)</label>
                             <input type="number" id="treeAge" required min="0"
                                 class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
                                 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
-                    </div>
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Tinggi Pohon (Meter)</label>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tinggi Pohon (Meter)</label>
                             <input type="number" id="treeHeight" step="0.1" required min="0"
                                 class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
                                 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Produksi (Kg)</label>
-                            <input type="number" id="production" step="0.1" required min="0"
-                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                    <!-- Kondisi Pokok Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900">Kondisi Pokok</h3>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Kondisi Pokok</label>
+                            <select id="kondisiPokok" required
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm
                                 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
-                    </div>
+                                <option value="" disabled selected>Pilih Kondisi Pokok</option>
+                                <option value="Produktif">Produktif</option>
+                                <option value="Sisip">Sisip</option>
+                                <option value="Abnormal">Abnormal</option>
+                                <option value="Mati">Mati</option>
+                                <option value="Kosong">Kosong</option>
+                            </select>
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Kondisi Kesehatan</label>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Kondisi Kesehatan</label>
                             <select id="healthCondition" required
                                 class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm
                                 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
-                            <option value="sehat">Sehat</option>
-                            <option value="kurang-sehat">Kurang Sehat</option>
-                            <option value="sakit">Sakit</option>
-                        </select>
+                                <option value="sehat">Sehat</option>
+                                <option value="kurang-sehat">Kurang Sehat</option>
+                                <option value="sakit">Sakit</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Catatan</label>
+                    <!-- Hasil Buah & Bunga Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900">Hasil Buah & Bunga</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Total Buah Bulan 1</label>
+                                <input type="number" id="buahBulan1" required min="0"
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Total Buah Bulan 2</label>
+                                <input type="number" id="buahBulan2" required min="0"
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Total Buah Bulan 3</label>
+                                <input type="number" id="buahBulan3" required min="0"
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Total Buah Bulan 4</label>
+                                <input type="number" id="buahBulan4" required min="0"
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                    focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Total Bunga</label>
+                            <input type="number" id="totalBunga" required min="0"
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                                focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Catatan</label>
                             <textarea id="notes" rows="3"
                                 class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
                                 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                 placeholder="Tambahkan catatan tentang pohon ini..."></textarea>
-                    </div>
+                        </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Koordinat Lokasi</label>
@@ -193,7 +333,8 @@
         </div>
     </div>
 
-    <!-- Custom JS -->
+    <!-- API and Custom JS -->
+    <script src="js/api.js"></script>
     <script src="js/app.js" defer></script>
 </body>
 </html>

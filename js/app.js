@@ -122,33 +122,104 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             trees.forEach((tree, index) => {
                 const treeItem = document.createElement('div');
-                treeItem.className = 'p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer mb-2';
+                treeItem.className = 'p-3 bg-gray-50 rounded-md hover:bg-gray-100 mb-2 transition-colors duration-200';
                 treeItem.innerHTML = `
                     <div class="flex justify-between items-center">
-                        <div class="flex-grow">
+                        <div class="flex-grow cursor-pointer" onclick="map.setView([${tree.latitude}, ${tree.longitude}], 15)">
                             <h3 class="font-medium">Pohon ID: ${tree.id}</h3>
                             <p class="text-sm text-gray-600">Region: ${tree.region} - ${tree.area}</p>
                             <p class="text-sm text-gray-600">Lokasi: Kebun ${tree.kebun}, Blok ${tree.blok}</p>
                             <p class="text-sm text-gray-600">Kondisi: ${tree.kondisiPokok} (${tree.health})</p>
                             <p class="text-sm text-gray-600">Total Buah: ${Number(tree.buahBulan1) + Number(tree.buahBulan2) + Number(tree.buahBulan3) + Number(tree.buahBulan4)} | Bunga: ${tree.totalBunga}</p>
                         </div>
-                        <button onclick="deleteTree(${index})" class="text-red-600 hover:text-red-800 ml-4">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button onclick="showTreePreview(${index})" 
+                                class="text-blue-600 hover:text-blue-800 transition-colors duration-200 p-1.5 hover:bg-blue-50 rounded-full"
+                                title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="deleteTree(${index})" 
+                                class="text-red-600 hover:text-red-800 transition-colors duration-200 p-1.5 hover:bg-red-50 rounded-full"
+                                title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
-                
-                // Add click event to center map on tree
-                treeItem.addEventListener('click', (e) => {
-                    // Don't trigger if clicking delete button
-                    if (!e.target.closest('button')) {
-                        map.setView([tree.latitude, tree.longitude], 15);
-                    }
-                });
-                
                 treeList.appendChild(treeItem);
             });
         }
+
+        // Preview Modal Functions
+        function closeTreePreview() {
+            document.getElementById('treePreviewModal').classList.add('hidden');
+        }
+
+        window.showTreePreview = function(index) {
+            const tree = trees[index];
+            if (!tree) return alert("Data pohon tidak ditemukan.");
+            
+            // Populate the preview content
+            document.getElementById('previewTreeTitle').textContent = `Pohon ID: ${tree.id}`;
+            const contentEl = document.getElementById('previewContent');
+            contentEl.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <p><strong class="text-gray-900">Region:</strong><br/>${tree.region}</p>
+                        <p><strong class="text-gray-900">Area:</strong><br/>${tree.area}</p>
+                        <p><strong class="text-gray-900">Kebun:</strong><br/>${tree.kebun}</p>
+                        <p><strong class="text-gray-900">Divisi:</strong><br/>${tree.divisi}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><strong class="text-gray-900">Blok:</strong><br/>${tree.blok}</p>
+                        <p><strong class="text-gray-900">Arah Masuk:</strong><br/>${tree.arahMasuk}</p>
+                        <p><strong class="text-gray-900">No Baris/Pokok:</strong><br/>${tree.noBaris} / ${tree.noPokok}</p>
+                        <p><strong class="text-gray-900">Umur/Tinggi:</strong><br/>${tree.age} tahun / ${tree.height} meter</p>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p><strong class="text-gray-900">Kondisi:</strong><br/>${tree.kondisiPokok} (${tree.health})</p>
+                    <p class="mt-2"><strong class="text-gray-900">Hasil Produksi:</strong></p>
+                    <div class="grid grid-cols-2 gap-4 mt-1">
+                        <div>
+                            <p>Buah Bulan 1: ${tree.buahBulan1}</p>
+                            <p>Buah Bulan 2: ${tree.buahBulan2}</p>
+                        </div>
+                        <div>
+                            <p>Buah Bulan 3: ${tree.buahBulan3}</p>
+                            <p>Buah Bulan 4: ${tree.buahBulan4}</p>
+                        </div>
+                    </div>
+                    <p class="mt-2"><strong>Total Buah:</strong> ${Number(tree.buahBulan1) + Number(tree.buahBulan2) + Number(tree.buahBulan3) + Number(tree.buahBulan4)} buah</p>
+                    <p><strong>Total Bunga:</strong> ${tree.totalBunga} bunga</p>
+                </div>
+                ${tree.notes ? `
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p><strong class="text-gray-900">Catatan:</strong><br/>${tree.notes}</p>
+                </div>
+                ` : ''}
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p><strong class="text-gray-900">Koordinat:</strong><br/>
+                    Latitude: ${tree.latitude}<br/>
+                    Longitude: ${tree.longitude}</p>
+                </div>
+            `;
+            
+            // Save the index on the delete button
+            document.getElementById('deletePreviewBtn').setAttribute('data-index', index);
+            
+            // Show modal
+            document.getElementById('treePreviewModal').classList.remove('hidden');
+        };
+
+        // Add event listeners for modal buttons
+        document.getElementById('closePreviewBtn').addEventListener('click', closeTreePreview);
+        document.getElementById('closeFooterBtn').addEventListener('click', closeTreePreview);
+        document.getElementById('deletePreviewBtn').addEventListener('click', async function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            await deleteTree(index);
+            closeTreePreview();
+        });
 
         // Function to delete tree
         window.deleteTree = async function(index) {

@@ -1,8 +1,9 @@
 // Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Initialize the map
     let map;
     let marker = null;
+    let trees = [];
     
     try {
         map = L.map('map').setView([-1.2921, 116.8271], 13); // Default center on East Kalimantan
@@ -13,8 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
             maxZoom: 19
         }).addTo(map);
 
-        // Initialize stored trees array
-        let trees = JSON.parse(localStorage.getItem('trees') || '[]');
+        // Load initial tree data
+        const response = await window.api.getProductions();
+        trees = response.data;
 
         // Handle map clicks
         map.on('click', function(e) {
@@ -34,20 +36,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Handle form submission
-        document.getElementById('treeForm').addEventListener('submit', function(e) {
+        document.getElementById('treeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Get form values
             const treeData = {
+                // Location & Classification
+                region: document.getElementById('region').value,
+                area: document.getElementById('area').value,
+                kebun: document.getElementById('kebun').value,
+                divisi: document.getElementById('divisi').value,
+                blok: document.getElementById('blok').value,
+                arahMasuk: document.getElementById('arahMasuk').value,
+                noBaris: document.getElementById('noBaris').value,
+                noPokok: document.getElementById('noPokok').value,
+                
+                // Tree Identification
                 id: document.getElementById('treeId').value,
                 age: document.getElementById('treeAge').value,
                 height: document.getElementById('treeHeight').value,
-                production: document.getElementById('production').value,
+                
+                // Tree Condition
+                kondisiPokok: document.getElementById('kondisiPokok').value,
                 health: document.getElementById('healthCondition').value,
+                
+                // Production Data
+                buahBulan1: document.getElementById('buahBulan1').value,
+                buahBulan2: document.getElementById('buahBulan2').value,
+                buahBulan3: document.getElementById('buahBulan3').value,
+                buahBulan4: document.getElementById('buahBulan4').value,
+                totalBunga: document.getElementById('totalBunga').value,
+                
+                // Notes & Location
                 notes: document.getElementById('notes').value,
                 latitude: document.getElementById('latitude').value,
-                longitude: document.getElementById('longitude').value,
-                timestamp: new Date().toISOString()
+                longitude: document.getElementById('longitude').value
             };
             
             // Validate coordinates
@@ -56,31 +79,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Save to local storage
-            trees.push(treeData);
-            localStorage.setItem('trees', JSON.stringify(trees));
-            
-            // Add marker to map with popup
-            const newMarker = L.marker([treeData.latitude, treeData.longitude])
-                .bindPopup(`
-                    <strong>ID: ${treeData.id}</strong><br>
-                    Produksi: ${treeData.production} kg<br>
-                    Umur: ${treeData.age} tahun<br>
-                    Kondisi: ${treeData.health}
-                `)
-                .addTo(map);
-            
-            // Update tree list
-            updateTreeList();
-            
-            // Reset form and marker
-            e.target.reset();
-            if (marker) {
-                marker.remove();
-                marker = null;
+            try {
+                // Save to storage via API
+                const response = await window.api.saveProduction(treeData);
+                
+                // Add marker to map with popup
+                const newMarker = L.marker([treeData.latitude, treeData.longitude])
+                    .bindPopup(`
+                        <strong>ID: ${treeData.id}</strong><br>
+                        Region: ${treeData.region} - ${treeData.area}<br>
+                        Lokasi: Kebun ${treeData.kebun}, Divisi ${treeData.divisi}, Blok ${treeData.blok}<br>
+                        Baris/Pokok: ${treeData.noBaris}/${treeData.noPokok}<br>
+                        Kondisi: ${treeData.kondisiPokok} (${treeData.health})<br>
+                        Total Buah: ${Number(treeData.buahBulan1) + Number(treeData.buahBulan2) + Number(treeData.buahBulan3) + Number(treeData.buahBulan4)} buah<br>
+                        Total Bunga: ${treeData.totalBunga} bunga
+                    `)
+                    .addTo(map);
+                
+                // Refresh tree data and update list
+                const updatedData = await window.api.getProductions();
+                trees = updatedData.data;
+                updateTreeList();
+                
+                // Reset form and marker
+                e.target.reset();
+                if (marker) {
+                    marker.remove();
+                    marker = null;
+                }
+                
+                alert('Data pohon berhasil disimpan!');
+            } catch (error) {
+                console.error('Error saving tree data:', error);
+                alert(error.message || 'Gagal menyimpan data pohon');
             }
-            
-            alert('Data pohon berhasil disimpan!');
         });
 
         // Function to update tree list
@@ -93,12 +125,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 treeItem.className = 'p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer mb-2';
                 treeItem.innerHTML = `
                     <div class="flex justify-between items-center">
-                        <div>
+                        <div class="flex-grow">
                             <h3 class="font-medium">Pohon ID: ${tree.id}</h3>
-                            <p class="text-sm text-gray-600">Produksi: ${tree.production} kg</p>
-                            <p class="text-sm text-gray-600">Kondisi: ${tree.health}</p>
+                            <p class="text-sm text-gray-600">Region: ${tree.region} - ${tree.area}</p>
+                            <p class="text-sm text-gray-600">Lokasi: Kebun ${tree.kebun}, Blok ${tree.blok}</p>
+                            <p class="text-sm text-gray-600">Kondisi: ${tree.kondisiPokok} (${tree.health})</p>
+                            <p class="text-sm text-gray-600">Total Buah: ${Number(tree.buahBulan1) + Number(tree.buahBulan2) + Number(tree.buahBulan3) + Number(tree.buahBulan4)} | Bunga: ${tree.totalBunga}</p>
                         </div>
-                        <button onclick="deleteTree(${index})" class="text-red-600 hover:text-red-800">
+                        <button onclick="deleteTree(${index})" class="text-red-600 hover:text-red-800 ml-4">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -117,30 +151,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Function to delete tree
-        window.deleteTree = function(index) {
+        window.deleteTree = async function(index) {
             if (confirm('Apakah Anda yakin ingin menghapus data pohon ini?')) {
-                trees.splice(index, 1);
-                localStorage.setItem('trees', JSON.stringify(trees));
-                updateTreeList();
-                
-                // Refresh map markers
-                map.eachLayer((layer) => {
-                    if (layer instanceof L.Marker) {
-                        map.removeLayer(layer);
-                    }
-                });
-                
-                // Reload existing markers
-                trees.forEach(tree => {
-                    L.marker([tree.latitude, tree.longitude])
-                        .bindPopup(`
-                            <strong>ID: ${tree.id}</strong><br>
-                            Produksi: ${tree.production} kg<br>
-                            Umur: ${tree.age} tahun<br>
-                            Kondisi: ${tree.health}
-                        `)
-                        .addTo(map);
-                });
+                try {
+                    await window.api.deleteProduction(index);
+                    
+                    // Refresh tree data
+                    const response = await window.api.getProductions();
+                    trees = response.data;
+                    updateTreeList();
+                    
+                    // Refresh map markers
+                    map.eachLayer((layer) => {
+                        if (layer instanceof L.Marker) {
+                            map.removeLayer(layer);
+                        }
+                    });
+                    
+                    // Reload existing markers
+                    trees.forEach(tree => {
+                        L.marker([tree.latitude, tree.longitude])
+                            .bindPopup(`
+                                <strong>ID: ${tree.id}</strong><br>
+                                Region: ${tree.region} - ${tree.area}<br>
+                                Lokasi: Kebun ${tree.kebun}, Divisi ${tree.divisi}, Blok ${tree.blok}<br>
+                                Baris/Pokok: ${tree.noBaris}/${tree.noPokok}<br>
+                                Kondisi: ${tree.kondisiPokok} (${tree.health})<br>
+                                Total Buah: ${Number(tree.buahBulan1) + Number(tree.buahBulan2) + Number(tree.buahBulan3) + Number(tree.buahBulan4)} buah<br>
+                                Total Bunga: ${tree.totalBunga} bunga
+                            `)
+                            .addTo(map);
+                    });
+                } catch (error) {
+                    console.error('Error deleting tree:', error);
+                    alert(error.message || 'Gagal menghapus data pohon');
+                }
             }
         };
 
@@ -150,9 +195,12 @@ document.addEventListener('DOMContentLoaded', function() {
             L.marker([tree.latitude, tree.longitude])
                 .bindPopup(`
                     <strong>ID: ${tree.id}</strong><br>
-                    Produksi: ${tree.production} kg<br>
-                    Umur: ${tree.age} tahun<br>
-                    Kondisi: ${tree.health}
+                    Region: ${tree.region} - ${tree.area}<br>
+                    Lokasi: Kebun ${tree.kebun}, Divisi ${tree.divisi}, Blok ${tree.blok}<br>
+                    Baris/Pokok: ${tree.noBaris}/${tree.noPokok}<br>
+                    Kondisi: ${tree.kondisiPokok} (${tree.health})<br>
+                    Total Buah: ${Number(tree.buahBulan1) + Number(tree.buahBulan2) + Number(tree.buahBulan3) + Number(tree.buahBulan4)} buah<br>
+                    Total Bunga: ${tree.totalBunga} bunga
                 `)
                 .addTo(map);
         });
@@ -164,11 +212,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Logout functionality
-window.handleLogout = function() {
+window.handleLogout = async function() {
     try {
-        localStorage.removeItem('isLogged');
-        localStorage.removeItem('loggedUser');
-        localStorage.removeItem('rememberMe');
+        await window.api.logout();
         window.location.href = 'login.html';
     } catch (error) {
         console.error('Error during logout:', error);
